@@ -10,12 +10,6 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>server-stats</artifactId>
-    <packaging>pom</packaging>
-    <modules>
-        <module>dto</module>
-        <module>service</module>
-        <module>client</module>
-    </modules>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
