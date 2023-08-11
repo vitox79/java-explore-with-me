@@ -15,20 +15,19 @@ import java.util.List;
 public class StatController {
     private final StatService service;
 
-    @GetMapping("/statistics")
-    public List<StatsDto> getStatistics(
-        @RequestParam("start") String startStr,
-        @RequestParam("end") String endStr,
-        @RequestParam(required = false) List<String> uris,
-        @RequestParam(defaultValue = "false", required = false) Boolean unique) {
-        log.info("Fetching statistics with parameters: start {}, end {}, uris {}, unique {}",
-            startStr, endStr, uris, unique);
-        return service.getStatus(startStr, endStr, uris, unique);
+    @PostMapping("/hit")
+    public HitDto createStat(@RequestBody @Valid HitDto dto) {
+        log.info("Обновление статистики: сохранение {}", dto);
+        return service.create(dto);
     }
 
-    @PostMapping("/record")
-    public HitDto createStatRecord(@RequestBody @Valid HitDto dto) {
-        log.info("Updating statistics: saving {}", dto);
-        return service.recordHit(dto);
+    @GetMapping("/stats")
+    public List<StatsDto> getStats(@RequestParam("start") String startStr,
+                                   @RequestParam("end") String endStr,
+                                   @RequestParam(required = false) List<String> uris,
+                                   @RequestParam(defaultValue = "false", required = false) Boolean unique) {
+        log.info("Получение статистики с параметрами: start {}, end {}, uris {}, unique {}",
+                startStr, endStr, uris, unique);
+        return service.getStatus(startStr, endStr, uris, unique);
     }
 }

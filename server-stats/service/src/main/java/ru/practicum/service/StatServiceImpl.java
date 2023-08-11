@@ -21,7 +21,7 @@ public class StatServiceImpl implements StatService {
     private final HitMapper mapper;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    public HitDto recordHit(HitDto dto) {
+    public HitDto create(HitDto dto) {
         Hit hit = repository.save(mapper.toHit(dto));
         return mapper.toHitDto(hit);
     }
