@@ -22,7 +22,7 @@ public class StatController {
     @PostMapping("/hit")
     @ResponseStatus(value = HttpStatus.CREATED)
     public HitDto createStat(@RequestBody @Valid NewHitDto dto) {
-        log.info("Обновление статистики: сохранение {}", dto);
+        log.info("Refresh data: saving {}", dto);
         return service.create(dto);
     }
 
@@ -31,14 +31,14 @@ public class StatController {
                                    @RequestParam("end") String endStr,
                                    @RequestParam(required = false) List<String> uris,
                                    @RequestParam(defaultValue = "false", required = false) Boolean unique) {
-        log.info("Получение статистики с параметрами: start {}, end {}, uris {}, unique {}",
+        log.info("Get statistics with: start {}, end {}, uris {}, unique {}",
                 startStr, endStr, uris, unique);
         return service.getStatus(startStr, endStr, uris, unique);
     }
 
     @GetMapping("/stats/views")
     public Long getStats(@RequestParam String uris) {
-        log.info("Получение статистики для event: uris {}",
+        log.info("Get statistics for event: uris {}",
                 uris);
         return service.getViews(uris);
     }
