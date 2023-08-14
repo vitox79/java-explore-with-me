@@ -17,7 +17,7 @@ public class ErrorHandlerController {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleValidatedException(final ValidationException e) {
-        log.debug("Status 400 Bad request {}", e.getMessage(), e);
+        log.debug("Получен статус 400 Bad request {}", e.getMessage(), e);
         return ApiError.builder()
                 .timestamp(LocalDateTime.now())
                 .errors(List.of(e.getStackTrace()))

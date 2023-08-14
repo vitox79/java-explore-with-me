@@ -7,9 +7,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dto.UserDto;
 import ru.practicum.exception.NotFoundException;
+import ru.practicum.mapper.UserMapper;
 import ru.practicum.model.User;
 import ru.practicum.repository.UserRepository;
-import ru.practicum.mapper.UserMapper;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,12 +18,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository repository;
+    private final UserMapper mapper;
 
     @Override
     @Transactional
     public UserDto create(UserDto userDto) {
-        User user = UserMapper.toUser(userDto);
-        return UserMapper.toUserDto(repository.save(user));
+        User user = mapper.toUser(userDto);
+        return mapper.toUserDto(repository.save(user));
     }
 
     @Override
@@ -31,13 +33,13 @@ public class UserServiceImpl implements UserService {
         int pageNumber = (int) Math.ceil((double) from / size);
         if (ids != null) {
             return repository.findByIdIn(ids, PageRequest.of(pageNumber, size, Sort.by("id").ascending()))
-                .stream().map(UserMapper::toUserDto)
-                .collect(Collectors.toList());
+                    .stream().map(mapper::toUserDto)
+                    .collect(Collectors.toList());
         } else {
             return repository.findAll(PageRequest.of(pageNumber, size, Sort.by("id").ascending()))
-                .stream()
-                .map(UserMapper::toUserDto)
-                .collect(Collectors.toList());
+                    .stream()
+                    .map(mapper::toUserDto)
+                    .collect(Collectors.toList());
         }
     }
 
@@ -51,7 +53,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public User getUser(Long id) {
         return repository.findById(id)
-            .orElseThrow(() -> new NotFoundException(String.format("Категории с id %d не найдено", id)));
+                .orElseThrow(() -> new NotFoundException(String.format("Категории с id %d не найдено", id)));
     }
 
     @Override

@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.EventDto;
 import ru.practicum.dto.NewEventDto;
 import ru.practicum.dto.UpdateEventDto;
-import ru.practicum.model.SearchEventParams;
 import ru.practicum.service.EventService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -67,8 +66,7 @@ public class EventController {
                 endStr, onlyAvailable, sortStr, from, size);
         log.info("client ip: {}", request.getRemoteAddr());
         log.info("endpoint path: {}", request.getRequestURI());
-        SearchEventParams params = new SearchEventParams(text,paid, catsId, startStr,endStr,onlyAvailable,sortStr);
-        return service.getAllPublic(params, from, size, request);
+        return service.getAllPublic(text, paid, catsId, startStr, endStr, onlyAvailable, sortStr, from, size, request);
     }
 
     @GetMapping("/events/{id}")
