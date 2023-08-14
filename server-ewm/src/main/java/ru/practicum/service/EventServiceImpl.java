@@ -41,8 +41,7 @@ public class EventServiceImpl implements EventService {
     private final UserRepository userRepository;
 
     private final CategoryRepository categoryRepository;
-
-    private final UserService userService;
+    
 
     private final EventMapper mapper;
     private final CategoryMapper categoryMapper;
@@ -284,7 +283,8 @@ public class EventServiceImpl implements EventService {
         }
         if (eventDto.getCategory() != null) {
             event.setCategory(categoryRepository.findById(eventDto.getCategory())
-                .orElseThrow(() -> new NotFoundException(String.format("Категории с id %d не найдено", eventDto.getCategory()))));
+                .orElseThrow(() -> new NotFoundException(
+                    String.format("Категории с id %d не найдено", eventDto.getCategory()))));
         }
         if (eventDto.getParticipantLimit() != null) {
             event.setParticipantLimit(eventDto.getParticipantLimit());
