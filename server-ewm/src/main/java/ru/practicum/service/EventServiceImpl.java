@@ -49,7 +49,8 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public EventDto create(NewEventDto newEventDto, Long userId) {
         Event event = mapper.toEvent(newEventDto);
-        event.setInitiator(userService.getUser(userId));
+        event.setInitiator(userRepository.findById(userId)
+            .orElseThrow(() -> new NotFoundException(String.format("Категории с id %d не найдено", userId))));
         event.setCategory(categoryService.getCategory(newEventDto.getCategory()));
         event = repository.save(event);
 
@@ -181,7 +182,7 @@ public class EventServiceImpl implements EventService {
     @Transactional(readOnly = true)
     public EventDto getForUserById(Long userId, Long eventId) {
         Event event = getEventById(eventId);
-        if (!getUser(userId).getId().equals(event.getInitiator().getId())) {
+        if (!userService.getUser(userId).getId().equals(event.getInitiator().getId())) {
             throw new ValidationException("Вы не являетесь инициатором события.");
         } else {
             return mapper.toEventDto(event, UserMapper.toUserShortDto(event.getInitiator()),
@@ -296,12 +297,4 @@ public class EventServiceImpl implements EventService {
             UserMapper.toUserShortDto(event.getInitiator()),
             categoryMapper.toCategoryDto(event.getCategory()));
     }
-
-    @Override
-    @Transactional
-    public User getUser(Long id) {
-        return userRepository.findById(id)
-            .orElseThrow(() -> new NotFoundException(String.format("Категории с id %d не найдено", id)));
-    }
-
 }
