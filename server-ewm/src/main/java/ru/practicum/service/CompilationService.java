@@ -1,7 +1,9 @@
 package ru.practicum.service;
 
 import ru.practicum.dto.CompilationDto;
+import ru.practicum.dto.EventShortDto;
 import ru.practicum.dto.NewCompilationDto;
+import ru.practicum.model.Event;
 
 import java.util.List;
 
@@ -15,4 +17,8 @@ public interface CompilationService {
     void delete(Long id);
 
     CompilationDto update(Long id, NewCompilationDto compilationDto);
+
+    public List<Event> getAllEvents(List<Long> ids);
+
+    public List<EventShortDto> getShortEvent(List<Event> events);
 }

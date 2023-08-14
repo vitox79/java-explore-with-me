@@ -43,12 +43,7 @@ public class EventServiceImpl implements EventService {
 
 
     private final UserRepository userRepository;
-
-    private final EventMapper eventMapper;
-
-    private final CategoryMapper categoryMapper;
-
-    private final UserMapper userMapper;
+    private final CategoryService categoryService;
 
 
     private final StatsClient client;
@@ -56,14 +51,14 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public EventDto create(NewEventDto newEventDto, Long userId) {
-        Event event = eventMapper.toEvent(newEventDto);
+        Event event = EventMapper.toEvent(newEventDto);
 
         event.setInitiator(getUser(userId));
         event.setCategory(getCategory(newEventDto.getCategory()));
         event = repository.save(event);
 
-        return eventMapper.toEventDto(event, userMapper.toUserShortDto(event.getInitiator()),
-            categoryMapper.toCategoryDto(event.getCategory()));
+        return EventMapper.toEventDto(event, UserMapper.toUserShortDto(event.getInitiator()),
+            CategoryMapper.toCategoryDto(event.getCategory()));
     }
 
     @Override
@@ -237,8 +232,8 @@ public class EventServiceImpl implements EventService {
         client.createHit(request);
         event.setViews(client.getStatsUnique(request.getRequestURI()).getBody());
         saveEvent(event);
-        return eventMapper.toEventDto(event, userMapper.toUserShortDto(event.getInitiator()),
-            categoryMapper.toCategoryDto(event.getCategory()));
+        return EventMapper.toEventDto(event, UserMapper.toUserShortDto(event.getInitiator()),
+            CategoryMapper.toCategoryDto(event.getCategory()));
     }
 
     @Override
@@ -249,8 +244,8 @@ public class EventServiceImpl implements EventService {
         if (!user.getId().equals(event.getInitiator().getId())) {
             throw new ValidationException("Вы не являетесь инициатором события.");
         } else {
-            return eventMapper.toEventDto(event, userMapper.toUserShortDto(event.getInitiator()),
-                categoryMapper.toCategoryDto(event.getCategory()));
+            return EventMapper.toEventDto(event, UserMapper.toUserShortDto(event.getInitiator()),
+                CategoryMapper.toCategoryDto(event.getCategory()));
         }
     }
 
@@ -301,8 +296,8 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventShortDto> getShortEvent(List<Event> events) {
         return events.stream().map(
-            event -> eventMapper.toEventShortDto(event, userMapper.toUserShortDto(event.getInitiator()),
-                categoryMapper.toCategoryDto(event.getCategory()))).collect(Collectors.toList());
+            event -> EventMapper.toEventShortDto(event, UserMapper.toUserShortDto(event.getInitiator()),
+                CategoryMapper.toCategoryDto(event.getCategory()))).collect(Collectors.toList());
     }
 
     private LocalDateTime fromString(String dateStr) {
@@ -315,8 +310,8 @@ public class EventServiceImpl implements EventService {
             return List.of();
         } else {
             return events.stream().map(
-                event -> eventMapper.toEventDto(event, userMapper.toUserShortDto(event.getInitiator()),
-                    categoryMapper.toCategoryDto(event.getCategory()))).collect(Collectors.toList());
+                event -> EventMapper.toEventDto(event, UserMapper.toUserShortDto(event.getInitiator()),
+                    CategoryMapper.toCategoryDto(event.getCategory()))).collect(Collectors.toList());
         }
     }
 
@@ -361,16 +356,18 @@ public class EventServiceImpl implements EventService {
             event.setRequestModeration(eventDto.getRequestModeration());
         }
 
-        return eventMapper.toEventDto(saveEvent(event), userMapper.toUserShortDto(event.getInitiator()),
-            categoryMapper.toCategoryDto(event.getCategory()));
+        return EventMapper.toEventDto(saveEvent(event), UserMapper.toUserShortDto(event.getInitiator()),
+            CategoryMapper.toCategoryDto(event.getCategory()));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Category> getAllById(List<Long> ids) {
         return categoryRepository.findAllById(ids);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Category getCategory(Long id) {
         return categoryRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(String.format("Категории с id %d не найдено", id)));
