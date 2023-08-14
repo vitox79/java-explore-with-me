@@ -21,6 +21,7 @@ import ru.practicum.mapper.EventMapper;
 import ru.practicum.mapper.UserMapper;
 import ru.practicum.model.Category;
 import ru.practicum.model.Event;
+import ru.practicum.model.SearchEventParams;
 import ru.practicum.model.User;
 import ru.practicum.repository.CategoryRepository;
 import ru.practicum.repository.EventRepository;
@@ -119,16 +120,15 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<EventDto> getAllPublic(String text, Boolean paid, List<Long> catsId, String startStr, String endStr,
-                                       boolean onlyAvailable, String sortStr, int from, int size,
+    public List<EventDto> getAllPublic(SearchEventParams params, int from, int size,
                                        HttpServletRequest request) {
         List<Event> events = List.of();
         int pageNumber = (int) Math.ceil((double) from / size);
-        if (text == null || text.isBlank() && catsId == null && paid != null && startStr != null && endStr != null) {
-            if (sortStr == null) {
+        if (params.getText() == null || params.getText().isBlank() && params.getCatsId() == null && params.getPaid() != null && params.getStartStr() != null && params.getEndStr()!= null) {
+            if (params.getSortStr() == null) {
                 events = repository.findAll(PageRequest.of(pageNumber, size)).toList();
             } else {
-                switch (Sorts.fromString(sortStr)) {
+                switch (Sorts.fromString(params.getSortStr())) {
                     case VIEWS:
                         events =
                             repository.findAll(PageRequest.of(pageNumber, size, Sort.by("views").ascending())).toList();
@@ -144,22 +144,23 @@ public class EventServiceImpl implements EventService {
             LocalDateTime start = null;
             LocalDateTime end = null;
             Sorts sort = null;
-            if (catsId != null) {
-                categories = categoryRepository.findAllById(catsId);
+            if (params.getCatsId() != null) {
+                categories = categoryRepository.findAllById(params.getCatsId());
             }
-            if (startStr != null) {
-                start = fromString(startStr);
+            if (params.getStartStr() != null) {
+                start = fromString(params.getStartStr());
             }
-            if (endStr != null) {
-                end = fromString(endStr);
+            if (params.getEndStr() != null) {
+                end = fromString(params.getEndStr());
             }
             if (end != null && start != null && end.isBefore(start)) {
                 throw new ValidationException("Окончание диапозона не может быть раньше начала диапозона");
             }
-            if (sortStr != null) {
-                sort = Sorts.fromString(sortStr);
+            if (params.getSortStr() != null) {
+                sort = Sorts.fromString(params.getSortStr());
             }
-            events = repository.findAllEventsForUserBy(text, paid, categories, start, end, onlyAvailable,
+            events = repository.findAllEventsForUserBy(params.getText(), params.getPaid(), categories, start, end,
+                params.getOnlyAvailable(),
                 sort, PageRequest.of(pageNumber, size));
         }
         client.createHit(request);
