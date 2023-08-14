@@ -49,8 +49,8 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public EventDto create(NewEventDto newEventDto, Long userId) {
         Event event = mapper.toEvent(newEventDto);
-        event.setInitiator(repository.findById(userId)
-            .orElseThrow(() -> new NotFoundException(String.format("Категории с id %d не найдено", userId))););
+        event.setInitiator(userRepository.findById(userId)
+            .orElseThrow(() -> new NotFoundException(String.format("Категории с id %d не найдено", userId))));
         event.setCategory(categoryService.getCategory(newEventDto.getCategory()));
         event = repository.save(event);
 
