@@ -44,11 +44,11 @@ public class EventServiceImpl implements EventService {
 
     private final UserRepository userRepository;
 
-    private EventMapper eventMapper;
+    private final EventMapper eventMapper;
 
-    private CategoryMapper categoryMapper;
+    private final CategoryMapper categoryMapper;
 
-    private UserMapper userMapper;
+    private final UserMapper userMapper;
 
 
     private final StatsClient client;
