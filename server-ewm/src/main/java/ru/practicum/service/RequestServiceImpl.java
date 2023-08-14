@@ -27,7 +27,7 @@ public class RequestServiceImpl implements RequestService {
     private final RequestRepository repository;
     private final UserService userService;
     private final EventService eventService;
-    private final RequestMapper mapper;
+
 
     @Override
     @Transactional
@@ -47,17 +47,17 @@ public class RequestServiceImpl implements RequestService {
             throw new ConflictException("Запросы на данное событие уже превышают лимит.");
         } else {
             Request request = Request.builder()
-                    .requester(requester)
-                    .event(event)
-                    .created(LocalDateTime.now())
-                    .status(Status.PENDING)
-                    .build();
+                .requester(requester)
+                .event(event)
+                .created(LocalDateTime.now())
+                .status(Status.PENDING)
+                .build();
             if (event.getParticipantLimit() == 0 || !event.getRequestModeration()) {
                 request.setStatus(Status.CONFIRMED);
                 event.setConfirmedRequests(event.getConfirmedRequests() + 1);
                 eventService.saveEvent(event);
             }
-            return mapper.toRequestDto(repository.save(request));
+            return RequestMapper.toRequestDto(repository.save(request));
         }
     }
 
@@ -66,12 +66,12 @@ public class RequestServiceImpl implements RequestService {
     public RequestDto cancel(Long requestId, Long userId) {
         User user = userService.getUser(userId);
         Request request = repository.findById(requestId)
-                .orElseThrow(() -> new NotFoundException(String.format("Категории с id %d не найдено", requestId)));
+            .orElseThrow(() -> new NotFoundException(String.format("Категории с id %d не найдено", requestId)));
         if (!user.getId().equals(request.getRequester().getId())) {
             throw new ValidationException("Вы не запрашивали участие на это событие.");
         }
         request.setStatus(Status.CANCELED);
-        return mapper.toRequestDto(repository.save(request));
+        return RequestMapper.toRequestDto(repository.save(request));
     }
 
     @Override
@@ -84,15 +84,15 @@ public class RequestServiceImpl implements RequestService {
         }
         List<Request> requests = repository.findAllById(requestDto.getRequestIds());
         List<Request> filterRequest = requests.stream().filter(request -> request.getStatus() == Status.CONFIRMED)
-                .collect(Collectors.toList());
+            .collect(Collectors.toList());
         if (filterRequest.size() == 0) {
             requests = requests.stream().peek(request -> request.setStatus(requestDto.getStatus()))
-                    .collect(Collectors.toList());
+                .collect(Collectors.toList());
         } else {
             throw new ConflictException("Невозможно изменить так как уже принято или отклонённая заявка.");
         }
         List<RequestDto> requestDtos = repository.saveAll(requests).stream()
-                .map(mapper::toRequestDto).collect(Collectors.toList());
+            .map(RequestMapper::toRequestDto).collect(Collectors.toList());
         switch (requestDto.getStatus()) {
             case REJECTED:
                 return UpdateRequestDtoResult.builder().rejectedRequests(requestDtos).build();
@@ -112,7 +112,8 @@ public class RequestServiceImpl implements RequestService {
     @Transactional(readOnly = true)
     public List<RequestDto> getByUser(Long userId) {
         User user = userService.getUser(userId);
-        return repository.findByRequesterId(user.getId()).stream().map(mapper::toRequestDto).collect(Collectors.toList());
+        return repository.findByRequesterId(user.getId()).stream().map(RequestMapper::toRequestDto)
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -123,6 +124,7 @@ public class RequestServiceImpl implements RequestService {
         if (!event.getInitiator().getId().equals(user.getId())) {
             throw new ConflictException("Вы не являетесь инициатором события, не возможно получить список заявок.");
         }
-        return repository.findByEventId(event.getId()).stream().map(mapper::toRequestDto).collect(Collectors.toList());
+        return repository.findByEventId(event.getId()).stream().map(RequestMapper::toRequestDto)
+            .collect(Collectors.toList());
     }
 }

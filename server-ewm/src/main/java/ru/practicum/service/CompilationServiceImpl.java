@@ -19,20 +19,20 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CompilationServiceImpl implements CompilationService {
     private final CompilationRepository repository;
-    private final CompilationMapper mapper;
+
     private final EventService eventService;
 
     @Override
     @Transactional
     public CompilationDto create(NewCompilationDto newCompilationDto) {
-        Compilation compilation = mapper.toCompilation(newCompilationDto);
+        Compilation compilation = CompilationMapper.toCompilation(newCompilationDto);
         if (compilation.getPinned() == null) {
             compilation.setPinned(false);
         }
         compilation.setEvents(eventService.getAllEvents(newCompilationDto.getEvents()));
         compilation = repository.save(compilation);
-        return mapper.toCompilationDto(compilation,
-                eventService.getShortEvent(compilation.getEvents()));
+        return CompilationMapper.toCompilationDto(compilation,
+            eventService.getShortEvent(compilation.getEvents()));
     }
 
     @Override
@@ -41,14 +41,14 @@ public class CompilationServiceImpl implements CompilationService {
         int pageNumber = (int) Math.ceil((double) from / size);
         if (pinned == null) {
             return repository.findAll(PageRequest.of(pageNumber, size)).stream()
-                    .map(compilation -> mapper.toCompilationDto(compilation,
-                            eventService.getShortEvent(compilation.getEvents())))
-                    .collect(Collectors.toList());
+                .map(compilation -> CompilationMapper.toCompilationDto(compilation,
+                    eventService.getShortEvent(compilation.getEvents())))
+                .collect(Collectors.toList());
         } else {
             return repository.findByPinned(pinned, PageRequest.of(pageNumber, size)).stream()
-                    .map(compilation -> mapper.toCompilationDto(compilation,
-                            eventService.getShortEvent(compilation.getEvents())))
-                    .collect(Collectors.toList());
+                .map(compilation -> CompilationMapper.toCompilationDto(compilation,
+                    eventService.getShortEvent(compilation.getEvents())))
+                .collect(Collectors.toList());
         }
     }
 
@@ -56,8 +56,8 @@ public class CompilationServiceImpl implements CompilationService {
     @Transactional(readOnly = true)
     public CompilationDto getById(Long id) {
         Compilation compilation = repository.findById(id).orElseThrow(() ->
-                new NotFoundException("Данной подборки не существует"));
-        return mapper.toCompilationDto(compilation, eventService.getShortEvent(compilation.getEvents()));
+            new NotFoundException("Данной подборки не существует"));
+        return CompilationMapper.toCompilationDto(compilation, eventService.getShortEvent(compilation.getEvents()));
     }
 
     @Override
@@ -70,7 +70,7 @@ public class CompilationServiceImpl implements CompilationService {
     @Transactional
     public CompilationDto update(Long id, NewCompilationDto compilationDto) {
         Compilation compilation = repository.findById(id).orElseThrow(() ->
-                new NotFoundException("Данной подборки не существует"));
+            new NotFoundException("Данной подборки не существует"));
         if (compilationDto.getTitle() != null) {
             if (compilationDto.getTitle().isBlank() || compilationDto.getTitle().length() > 50) {
                 throw new ValidationException("Название не может быть пустым или больше 50");
@@ -85,6 +85,6 @@ public class CompilationServiceImpl implements CompilationService {
             compilation.setEvents(eventService.getAllEvents(compilationDto.getEvents()));
         }
         compilation = repository.save(compilation);
-        return mapper.toCompilationDto(compilation, eventService.getShortEvent(compilation.getEvents()));
+        return CompilationMapper.toCompilationDto(compilation, eventService.getShortEvent(compilation.getEvents()));
     }
 }

@@ -1,21 +1,23 @@
 package ru.practicum.mapper;
 
-import org.springframework.stereotype.Component;
+
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import ru.practicum.dto.CategoryDto;
 import ru.practicum.model.Category;
 
-@Component
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CategoryMapper {
-    public Category toCategory(CategoryDto categoryDto) {
+    public static Category toCategory(CategoryDto categoryDto) {
         return Category.builder()
-                .name(categoryDto.getName())
-                .build();
+            .name(categoryDto.getName())
+            .build();
     }
 
-    public CategoryDto toCategoryDto(Category category) {
+    public static CategoryDto toCategoryDto(Category category) {
         return CategoryDto.builder()
-                .id(category.getId())
-                .name(category.getName())
-                .build();
+            .id(category.getId())
+            .name(category.getName())
+            .build();
     }
 }

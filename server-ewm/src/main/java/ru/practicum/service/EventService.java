@@ -5,6 +5,7 @@ import ru.practicum.dto.EventShortDto;
 import ru.practicum.dto.NewEventDto;
 import ru.practicum.dto.UpdateEventDto;
 import ru.practicum.model.Event;
+import ru.practicum.model.SearchEventParams;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -20,6 +21,8 @@ public interface EventService {
 
     List<EventDto> getAllPublic(String text, Boolean paid, List<Long> catsId, String startStr, String endStr,
                                 boolean onlyAvailable, String sortStr, int from, int size, HttpServletRequest request);
+
+    List<EventDto> getAllPublic(SearchEventParams searchEventParams, int from, int size, HttpServletRequest request);
 
     EventDto getPublicById(Long id, HttpServletRequest request);
 
