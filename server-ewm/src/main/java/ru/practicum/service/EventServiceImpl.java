@@ -177,7 +177,8 @@ public class EventServiceImpl implements EventService {
     @Transactional(readOnly = true)
     public EventDto getForUserById(Long userId, Long eventId) {
         Event event = getEventById(eventId);
-        if (!userService.getUser(userId).getId().equals(event.getInitiator().getId())) {
+        if (!userRepository.findById(userId)
+            .orElseThrow(() -> new NotFoundException(String.format("Категории с id %d не найдено", userId))).getId().equals(event.getInitiator().getId())) {
             throw new ValidationException("Вы не являетесь инициатором события.");
         } else {
             return mapper.toEventDto(event, UserMapper.toUserShortDto(event.getInitiator()),
@@ -189,7 +190,9 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public EventDto update(Long userId, Long eventId, UpdateEventDto eventDto) {
         Event event = getEventById(eventId);
-        if (!userService.getUser(userId).getId().equals(event.getInitiator().getId())) {
+        if (!userRepository.findById(userId)
+            .orElseThrow(() -> new NotFoundException(String.format("Категории с id %d не найдено", userId)))
+            .getId().equals(event.getInitiator().getId())) {
             throw new ValidationException("Вы не являетесь инициатором события.");
         }
         if (event.getState() == State.PUBLISHED) {
