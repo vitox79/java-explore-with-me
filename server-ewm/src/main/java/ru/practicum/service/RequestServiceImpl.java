@@ -15,7 +15,9 @@ import ru.practicum.mapper.RequestMapper;
 import ru.practicum.model.Event;
 import ru.practicum.model.Request;
 import ru.practicum.model.User;
+import ru.practicum.repository.EventRepository;
 import ru.practicum.repository.RequestRepository;
+import ru.practicum.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,15 +27,17 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RequestServiceImpl implements RequestService {
     private final RequestRepository repository;
-    private final UserService userService;
-    private final EventService eventService;
+
+    private final UserRepository userRepository;
+
+    private final EventRepository eventRepository;
 
 
     @Override
     @Transactional
     public RequestDto createRequest(Long eventId, Long userId) {
-        Event event = eventService.getEventById(eventId);
-        User requester = userService.getUser(userId);
+        Event event = getEventById(eventId);
+        User requester = getUser(userId);
         if (requester.getId().equals(event.getInitiator().getId())) {
             throw new ConflictException("Вы являетесь инициатором события.");
         }
@@ -55,7 +59,7 @@ public class RequestServiceImpl implements RequestService {
             if (event.getParticipantLimit() == 0 || !event.getRequestModeration()) {
                 request.setStatus(Status.CONFIRMED);
                 event.setConfirmedRequests(event.getConfirmedRequests() + 1);
-                eventService.saveEvent(event);
+                saveEvent(event);
             }
             return RequestMapper.toRequestDto(repository.save(request));
         }
@@ -64,7 +68,7 @@ public class RequestServiceImpl implements RequestService {
     @Override
     @Transactional
     public RequestDto cancel(Long requestId, Long userId) {
-        User user = userService.getUser(userId);
+        User user = getUser(userId);
         Request request = repository.findById(requestId)
             .orElseThrow(() -> new NotFoundException(String.format("Категории с id %d не найдено", requestId)));
         if (!user.getId().equals(request.getRequester().getId())) {
@@ -77,8 +81,8 @@ public class RequestServiceImpl implements RequestService {
     @Override
     @Transactional
     public UpdateRequestDtoResult update(Long eventId, Long userId, UpdateRequestDtoRequest requestDto) {
-        User user = userService.getUser(userId);
-        Event event = eventService.getEventById(eventId);
+        User user = getUser(userId);
+        Event event = getEventById(eventId);
         if (!event.getInitiator().getId().equals(user.getId())) {
             throw new ConflictException("Вы не являетесь инициатором события, не возможно изменить статус заявок.");
         }
@@ -101,7 +105,7 @@ public class RequestServiceImpl implements RequestService {
                     throw new ConflictException("Вы не можете принять данную заявку, так как лимит будет превышен");
                 }
                 event.setConfirmedRequests(event.getConfirmedRequests() + requestDtos.size());
-                eventService.saveEvent(event);
+                saveEvent(event);
                 return UpdateRequestDtoResult.builder().confirmedRequests(requestDtos).build();
             default:
                 throw new ValidationException("Вы можете только подтвердить или отказать заявкам на участие.");
@@ -111,7 +115,7 @@ public class RequestServiceImpl implements RequestService {
     @Override
     @Transactional(readOnly = true)
     public List<RequestDto> getByUser(Long userId) {
-        User user = userService.getUser(userId);
+        User user = getUser(userId);
         return repository.findByRequesterId(user.getId()).stream().map(RequestMapper::toRequestDto)
             .collect(Collectors.toList());
     }
@@ -119,12 +123,34 @@ public class RequestServiceImpl implements RequestService {
     @Override
     @Transactional(readOnly = true)
     public List<RequestDto> getByEvent(Long userId, Long eventId) {
-        User user = userService.getUser(userId);
-        Event event = eventService.getEventById(eventId);
+        User user = getUser(userId);
+        Event event = getEventById(eventId);
         if (!event.getInitiator().getId().equals(user.getId())) {
             throw new ConflictException("Вы не являетесь инициатором события, не возможно получить список заявок.");
         }
         return repository.findByEventId(event.getId()).stream().map(RequestMapper::toRequestDto)
             .collect(Collectors.toList());
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public User getUser(Long id) {
+        return userRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException(String.format("Категории с id %d не найдено", id)));
+    }
+
+    @Override
+    @Transactional
+    public Event saveEvent(Event event) {
+        return eventRepository.save(event);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Event getEventById(Long id) {
+        return eventRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException(String.format("Категории с id %d не найдено", id)));
+    }
+
+
 }

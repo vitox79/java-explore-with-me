@@ -5,12 +5,18 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dto.CompilationDto;
+import ru.practicum.dto.EventShortDto;
 import ru.practicum.dto.NewCompilationDto;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
+import ru.practicum.mapper.CategoryMapper;
 import ru.practicum.mapper.CompilationMapper;
+import ru.practicum.mapper.EventMapper;
+import ru.practicum.mapper.UserMapper;
 import ru.practicum.model.Compilation;
+import ru.practicum.model.Event;
 import ru.practicum.repository.CompilationRepository;
+import ru.practicum.repository.EventRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,7 +26,8 @@ import java.util.stream.Collectors;
 public class CompilationServiceImpl implements CompilationService {
     private final CompilationRepository repository;
 
-    private final EventService eventService;
+    private final EventRepository eventRepository;
+
 
     @Override
     @Transactional
@@ -29,10 +36,10 @@ public class CompilationServiceImpl implements CompilationService {
         if (compilation.getPinned() == null) {
             compilation.setPinned(false);
         }
-        compilation.setEvents(eventService.getAllEvents(newCompilationDto.getEvents()));
+        compilation.setEvents(getAllEvents(newCompilationDto.getEvents()));
         compilation = repository.save(compilation);
         return CompilationMapper.toCompilationDto(compilation,
-            eventService.getShortEvent(compilation.getEvents()));
+            getShortEvent(compilation.getEvents()));
     }
 
     @Override
@@ -42,12 +49,12 @@ public class CompilationServiceImpl implements CompilationService {
         if (pinned == null) {
             return repository.findAll(PageRequest.of(pageNumber, size)).stream()
                 .map(compilation -> CompilationMapper.toCompilationDto(compilation,
-                    eventService.getShortEvent(compilation.getEvents())))
+                    getShortEvent(compilation.getEvents())))
                 .collect(Collectors.toList());
         } else {
             return repository.findByPinned(pinned, PageRequest.of(pageNumber, size)).stream()
                 .map(compilation -> CompilationMapper.toCompilationDto(compilation,
-                    eventService.getShortEvent(compilation.getEvents())))
+                    getShortEvent(compilation.getEvents())))
                 .collect(Collectors.toList());
         }
     }
@@ -57,7 +64,7 @@ public class CompilationServiceImpl implements CompilationService {
     public CompilationDto getById(Long id) {
         Compilation compilation = repository.findById(id).orElseThrow(() ->
             new NotFoundException("Данной подборки не существует"));
-        return CompilationMapper.toCompilationDto(compilation, eventService.getShortEvent(compilation.getEvents()));
+        return CompilationMapper.toCompilationDto(compilation, getShortEvent(compilation.getEvents()));
     }
 
     @Override
@@ -82,9 +89,25 @@ public class CompilationServiceImpl implements CompilationService {
             compilation.setPinned(compilationDto.getPinned());
         }
         if (compilationDto.getEvents() != null) {
-            compilation.setEvents(eventService.getAllEvents(compilationDto.getEvents()));
+            compilation.setEvents(getAllEvents(compilationDto.getEvents()));
         }
         compilation = repository.save(compilation);
-        return CompilationMapper.toCompilationDto(compilation, eventService.getShortEvent(compilation.getEvents()));
+        return CompilationMapper.toCompilationDto(compilation, getShortEvent(compilation.getEvents()));
+    }
+
+    public List<EventShortDto> getShortEvent(List<Event> events) {
+        return events.stream().map(
+            event -> EventMapper.toEventShortDto(event, UserMapper.toUserShortDto(event.getInitiator()),
+                CategoryMapper.toCategoryDto(event.getCategory()))).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Event> getAllEvents(List<Long> ids) {
+        if (ids != null) {
+            return eventRepository.findAllById(ids);
+        } else {
+            return List.of();
+        }
     }
 }
