@@ -18,11 +18,13 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
     private final UserRepository repository;
 
+    private final UserMapper userMapper;
+
     @Override
     @Transactional
     public UserDto create(UserDto userDto) {
-        User user = UserMapper.toUser(userDto);
-        return UserMapper.toUserDto(repository.save(user));
+        User user = userMapper.toUser(userDto);
+        return userMapper.toUserDto(repository.save(user));
     }
 
     @Override
@@ -31,12 +33,12 @@ public class UserServiceImpl implements UserService {
         int pageNumber = (int) Math.ceil((double) from / size);
         if (ids != null) {
             return repository.findByIdIn(ids, PageRequest.of(pageNumber, size, Sort.by("id").ascending()))
-                .stream().map(UserMapper::toUserDto)
+                .stream().map(userMapper::toUserDto)
                 .collect(Collectors.toList());
         } else {
             return repository.findAll(PageRequest.of(pageNumber, size, Sort.by("id").ascending()))
                 .stream()
-                .map(UserMapper::toUserDto)
+                .map(userMapper::toUserDto)
                 .collect(Collectors.toList());
         }
     }
