@@ -5,12 +5,18 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dto.CompilationDto;
+import ru.practicum.dto.EventShortDto;
 import ru.practicum.dto.NewCompilationDto;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
+import ru.practicum.mapper.CategoryMapper;
 import ru.practicum.mapper.CompilationMapper;
+import ru.practicum.mapper.EventMapper;
+import ru.practicum.mapper.UserMapper;
 import ru.practicum.model.Compilation;
+import ru.practicum.model.Event;
 import ru.practicum.repository.CompilationRepository;
+import ru.practicum.repository.EventRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,20 +25,28 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CompilationServiceImpl implements CompilationService {
     private final CompilationRepository repository;
-    private final CompilationMapper mapper;
-    private final EventService eventService;
+
+    private final EventRepository eventRepository;
+
+    private final  CompilationMapper compilationMapper;
+
+    private final UserMapper userMapper;
+
+    private final CategoryMapper categoryMapper;
+
+    private final EventMapper eventMapper;
 
     @Override
     @Transactional
     public CompilationDto create(NewCompilationDto newCompilationDto) {
-        Compilation compilation = mapper.toCompilation(newCompilationDto);
+        Compilation compilation = compilationMapper.toCompilation(newCompilationDto);
         if (compilation.getPinned() == null) {
             compilation.setPinned(false);
         }
-        compilation.setEvents(eventService.getAllEvents(newCompilationDto.getEvents()));
+        compilation.setEvents(getAllEvents(newCompilationDto.getEvents()));
         compilation = repository.save(compilation);
-        return mapper.toCompilationDto(compilation,
-                eventService.getShortEvent(compilation.getEvents()));
+        return compilationMapper.toCompilationDto(compilation,
+            getShortEvent(compilation.getEvents()));
     }
 
     @Override
@@ -41,14 +55,14 @@ public class CompilationServiceImpl implements CompilationService {
         int pageNumber = (int) Math.ceil((double) from / size);
         if (pinned == null) {
             return repository.findAll(PageRequest.of(pageNumber, size)).stream()
-                    .map(compilation -> mapper.toCompilationDto(compilation,
-                            eventService.getShortEvent(compilation.getEvents())))
-                    .collect(Collectors.toList());
+                .map(compilation -> compilationMapper.toCompilationDto(compilation,
+                    getShortEvent(compilation.getEvents())))
+                .collect(Collectors.toList());
         } else {
             return repository.findByPinned(pinned, PageRequest.of(pageNumber, size)).stream()
-                    .map(compilation -> mapper.toCompilationDto(compilation,
-                            eventService.getShortEvent(compilation.getEvents())))
-                    .collect(Collectors.toList());
+                .map(compilation -> compilationMapper.toCompilationDto(compilation,
+                    getShortEvent(compilation.getEvents())))
+                .collect(Collectors.toList());
         }
     }
 
@@ -56,8 +70,8 @@ public class CompilationServiceImpl implements CompilationService {
     @Transactional(readOnly = true)
     public CompilationDto getById(Long id) {
         Compilation compilation = repository.findById(id).orElseThrow(() ->
-                new NotFoundException("Данной подборки не существует"));
-        return mapper.toCompilationDto(compilation, eventService.getShortEvent(compilation.getEvents()));
+            new NotFoundException("Данной подборки не существует"));
+        return compilationMapper.toCompilationDto(compilation, getShortEvent(compilation.getEvents()));
     }
 
     @Override
@@ -70,7 +84,7 @@ public class CompilationServiceImpl implements CompilationService {
     @Transactional
     public CompilationDto update(Long id, NewCompilationDto compilationDto) {
         Compilation compilation = repository.findById(id).orElseThrow(() ->
-                new NotFoundException("Данной подборки не существует"));
+            new NotFoundException("Данной подборки не существует"));
         if (compilationDto.getTitle() != null) {
             if (compilationDto.getTitle().isBlank() || compilationDto.getTitle().length() > 50) {
                 throw new ValidationException("Название не может быть пустым или больше 50");
@@ -82,9 +96,26 @@ public class CompilationServiceImpl implements CompilationService {
             compilation.setPinned(compilationDto.getPinned());
         }
         if (compilationDto.getEvents() != null) {
-            compilation.setEvents(eventService.getAllEvents(compilationDto.getEvents()));
+            compilation.setEvents(getAllEvents(compilationDto.getEvents()));
         }
         compilation = repository.save(compilation);
-        return mapper.toCompilationDto(compilation, eventService.getShortEvent(compilation.getEvents()));
+        return compilationMapper.toCompilationDto(compilation, getShortEvent(compilation.getEvents()));
+    }
+
+    @Override
+    public List<EventShortDto> getShortEvent(List<Event> events) {
+        return events.stream().map(
+            event -> eventMapper.toEventShortDto(event, userMapper.toUserShortDto(event.getInitiator()),
+                categoryMapper.toCategoryDto(event.getCategory()))).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Event> getAllEvents(List<Long> ids) {
+        if (ids != null) {
+            return eventRepository.findAllById(ids);
+        } else {
+            return List.of();
+        }
     }
 }
