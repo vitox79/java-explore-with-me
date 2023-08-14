@@ -52,7 +52,7 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public EventDto create(NewEventDto newEventDto, Long userId) {
         Event event = mapper.toEvent(newEventDto);
-        event.setInitiator(getUser(userId));
+        event.setInitiator(userService.getUser(userId));
         event.setCategory(categoryService.getCategory(newEventDto.getCategory()));
         event = repository.save(event);
 
@@ -179,7 +179,7 @@ public class EventServiceImpl implements EventService {
     @Transactional(readOnly = true)
     public EventDto getForUserById(Long userId, Long eventId) {
         Event event = getEventById(eventId);
-        if (!getUser(userId).getId().equals(event.getInitiator().getId())) {
+        if (!userService.getUser(userId).getId().equals(event.getInitiator().getId())) {
             throw new ValidationException("Вы не являетесь инициатором события.");
         } else {
             return mapper.toEventDto(event, UserMapper.toUserShortDto(event.getInitiator()),
@@ -191,7 +191,7 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public EventDto update(Long userId, Long eventId, UpdateEventDto eventDto) {
         Event event = getEventById(eventId);
-        if (!getUser(userId).getId().equals(event.getInitiator().getId())) {
+        if (!userService.getUser(userId).getId().equals(event.getInitiator().getId())) {
             throw new ValidationException("Вы не являетесь инициатором события.");
         }
         if (event.getState() == State.PUBLISHED) {
@@ -295,7 +295,6 @@ public class EventServiceImpl implements EventService {
                 categoryMapper.toCategoryDto(event.getCategory()));
     }
 
-    @Override
     @Transactional(readOnly = true)
     public User getUser(Long id) {
         return userRepository.findById(id)

@@ -36,5 +36,5 @@ public interface EventService {
 
     List<EventShortDto> getShortEvent(List<Event> events);
 
-     User getUser(Long id);
+
 }
