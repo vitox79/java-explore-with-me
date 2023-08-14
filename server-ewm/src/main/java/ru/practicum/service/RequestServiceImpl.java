@@ -33,6 +33,9 @@ public class RequestServiceImpl implements RequestService {
     private final EventRepository eventRepository;
 
 
+    private final UserService userService;
+    private final EventService eventService;
+
     @Override
     @Transactional
     public RequestDto createRequest(Long eventId, Long userId) {
@@ -123,8 +126,8 @@ public class RequestServiceImpl implements RequestService {
     @Override
     @Transactional(readOnly = true)
     public List<RequestDto> getByEvent(Long userId, Long eventId) {
-        User user = getUser(userId);
-        Event event = getEventById(eventId);
+        User user = userService.getUser(userId);
+        Event event = eventService.getEventById(eventId);
         if (!event.getInitiator().getId().equals(user.getId())) {
             throw new ConflictException("Вы не являетесь инициатором события, не возможно получить список заявок.");
         }
