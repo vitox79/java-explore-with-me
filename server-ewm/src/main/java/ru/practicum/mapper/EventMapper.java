@@ -10,7 +10,6 @@ import ru.practicum.model.Location;
 
 import java.time.LocalDateTime;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class EventMapper {
     public static Event toEvent(NewEventDto eventDto) {
         return Event.builder()

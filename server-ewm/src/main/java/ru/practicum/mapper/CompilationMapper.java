@@ -10,7 +10,6 @@ import ru.practicum.model.Compilation;
 
 import java.util.List;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CompilationMapper {
     public static Compilation toCompilation(NewCompilationDto compilationDto) {
         return Compilation.builder()
