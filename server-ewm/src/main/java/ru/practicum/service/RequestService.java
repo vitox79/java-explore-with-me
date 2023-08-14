@@ -19,11 +19,11 @@ public interface RequestService {
 
     List<RequestDto> getByEvent(Long userId, Long eventId);
 
-    public User getUser(Long id) ;
+    public User getUser(Long id);
 
-    public Event saveEvent(Event event) ;
+    public Event saveEvent(Event event);
 
     public Event getEventById(Long id);
 
 
-    }
+}

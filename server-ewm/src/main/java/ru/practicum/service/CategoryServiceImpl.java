@@ -54,7 +54,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public Category getCategory(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new NotFoundException(String.format("Категории с id %d не найдено", id)));
+            .orElseThrow(() -> new NotFoundException(String.format("Категории с id %d не найдено", id)));
     }
 
     @Override
