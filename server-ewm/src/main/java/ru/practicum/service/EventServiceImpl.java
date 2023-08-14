@@ -23,7 +23,6 @@ import ru.practicum.model.Category;
 import ru.practicum.model.Event;
 import ru.practicum.model.User;
 import ru.practicum.repository.EventRepository;
-import ru.practicum.repository.UserRepository;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
