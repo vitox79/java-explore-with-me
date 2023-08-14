@@ -124,7 +124,9 @@ public class EventServiceImpl implements EventService {
                                        HttpServletRequest request) {
         List<Event> events = List.of();
         int pageNumber = (int) Math.ceil((double) from / size);
-        if (params.getText() == null || params.getText().isBlank() && params.getCatsId() == null && params.getPaid() != null && params.getStartStr() != null && params.getEndStr()!= null) {
+        if (params.getText() == null ||
+            params.getText().isBlank() && params.getCatsId() == null && params.getPaid() != null &&
+                params.getStartStr() != null && params.getEndStr() != null) {
             if (params.getSortStr() == null) {
                 events = repository.findAll(PageRequest.of(pageNumber, size)).toList();
             } else {
