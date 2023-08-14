@@ -113,6 +113,7 @@ public class RequestServiceImpl implements RequestService {
             default:
                 throw new ValidationException("Вы можете только подтвердить или отказать заявкам на участие.");
         }
+
     }
 
     @Override
