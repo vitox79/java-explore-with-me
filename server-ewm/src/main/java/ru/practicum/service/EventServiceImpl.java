@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 public class EventServiceImpl implements EventService {
     private final EventRepository repository;
 
-    private final UserRepository userRepository;
+   
     private final UserService userService;
     private final CategoryService categoryService;
     private final EventMapper mapper;
