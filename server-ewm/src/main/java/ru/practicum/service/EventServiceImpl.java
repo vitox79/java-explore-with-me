@@ -81,11 +81,9 @@ public class EventServiceImpl implements EventService {
                 }
             }
             if (usersId != null) {
-                if (usersId != null) {
-                    users = userRepository.findAllById(usersId);
-                } else {
-                    users = List.of();
-                }
+                users = userRepository.findAllById(usersId);
+            } else {
+                users = List.of();
             }
 
             if (catsId != null) {
