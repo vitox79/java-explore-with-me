@@ -4,9 +4,7 @@ import ru.practicum.dto.EventDto;
 import ru.practicum.dto.EventShortDto;
 import ru.practicum.dto.NewEventDto;
 import ru.practicum.dto.UpdateEventDto;
-import ru.practicum.model.Category;
 import ru.practicum.model.Event;
-import ru.practicum.model.SearchEventParams;
 import ru.practicum.model.User;
 
 import javax.servlet.http.HttpServletRequest;
@@ -15,8 +13,7 @@ import java.util.List;
 public interface EventService {
     EventDto create(NewEventDto newEventDto, Long userId);
 
-    List<EventDto> getAll(List<Long> users, List<String> states, List<Long> catsId, String startStr, String endStr,
-                          int from, int size);
+    List<EventDto> getAll(List<Long> users, List<String> states, List<Long> catsId, String startStr, String endStr, int from, int size);
 
     EventDto published(Long id, UpdateEventDto eventDto);
 
@@ -24,8 +21,6 @@ public interface EventService {
 
     List<EventDto> getAllPublic(String text, Boolean paid, List<Long> catsId, String startStr, String endStr,
                                 boolean onlyAvailable, String sortStr, int from, int size, HttpServletRequest request);
-
-    List<EventDto> getAllPublic(SearchEventParams searchEventParams, int from, int size, HttpServletRequest request);
 
     EventDto getPublicById(Long id, HttpServletRequest request);
 
@@ -39,11 +34,7 @@ public interface EventService {
 
     List<Event> getAllEvents(List<Long> ids);
 
-    User getUser(Long id);
-
     List<EventShortDto> getShortEvent(List<Event> events);
 
-    public List<Category> getAllById(List<Long> ids);
-
-    public Category getCategory(Long id);
+     User getUser(Long id);
 }
