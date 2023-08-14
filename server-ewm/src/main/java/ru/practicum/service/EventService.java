@@ -1,7 +1,7 @@
 package ru.practicum.service;
 
 import ru.practicum.dto.EventDto;
-import ru.practicum.dto.EventShortDto;
+
 import ru.practicum.dto.NewEventDto;
 import ru.practicum.dto.UpdateEventDto;
 import ru.practicum.model.Event;

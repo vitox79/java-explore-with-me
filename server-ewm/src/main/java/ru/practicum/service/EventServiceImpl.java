@@ -225,7 +225,7 @@ public class EventServiceImpl implements EventService {
     public Event saveEvent(Event event) {
         return repository.save(event);
     }
-    
+
 
     private LocalDateTime fromString(String dateStr) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
