@@ -32,9 +32,4 @@ public interface EventService {
 
     Event saveEvent(Event event);
 
-    List<Event> getAllEvents(List<Long> ids);
-
-    List<EventShortDto> getShortEvent(List<Event> events);
-
-
 }

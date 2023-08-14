@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.StatsClient;
 import ru.practicum.dto.EventDto;
-import ru.practicum.dto.EventShortDto;
 import ru.practicum.dto.NewEventDto;
 import ru.practicum.dto.UpdateEventDto;
 import ru.practicum.enums.Sorts;
@@ -226,25 +225,7 @@ public class EventServiceImpl implements EventService {
     public Event saveEvent(Event event) {
         return repository.save(event);
     }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<Event> getAllEvents(List<Long> ids) {
-        if (ids != null) {
-            return repository.findAllById(ids);
-        } else {
-            return List.of();
-        }
-    }
-
-    @Override
-    public List<EventShortDto> getShortEvent(List<Event> events) {
-        return events.stream()
-            .map(event -> EventMapper.toEventShortDto(event,
-                UserMapper.toUserShortDto(event.getInitiator()),
-                categoryMapper.toCategoryDto(event.getCategory())))
-            .collect(Collectors.toList());
-    }
+    
 
     private LocalDateTime fromString(String dateStr) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");

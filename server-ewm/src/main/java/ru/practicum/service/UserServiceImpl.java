@@ -49,20 +49,5 @@ public class UserServiceImpl implements UserService {
         repository.deleteById(id);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public User getUser(Long id) {
-        return repository.findById(id)
-            .orElseThrow(() -> new NotFoundException(String.format("Категории с id %d не найдено", id)));
-    }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<User> getAllById(List<Long> ids) {
-        if (ids != null) {
-            return repository.findAllById(ids);
-        } else {
-            return List.of();
-        }
-    }
 }
