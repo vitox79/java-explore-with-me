@@ -95,6 +95,7 @@ public class CompilationServiceImpl implements CompilationService {
         return CompilationMapper.toCompilationDto(compilation, getShortEvent(compilation.getEvents()));
     }
 
+    @Override
     public List<EventShortDto> getShortEvent(List<Event> events) {
         return events.stream().map(
             event -> EventMapper.toEventShortDto(event, UserMapper.toUserShortDto(event.getInitiator()),
