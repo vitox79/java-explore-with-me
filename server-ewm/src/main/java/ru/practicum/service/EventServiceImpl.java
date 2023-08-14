@@ -42,16 +42,20 @@ public class EventServiceImpl implements EventService {
 
     private final StatsClient client;
 
+    private final EventMapper eventMapper;
+
+    private final CategoryMapper categoryMapper;
+
     @Override
     @Transactional
     public EventDto create(NewEventDto newEventDto, Long userId) {
-        Event event = EventMapper.toEvent(newEventDto);
+        Event event = eventMapper.toEvent(newEventDto);
         event.setInitiator(userService.getUser(userId));
         event.setCategory(categoryService.getCategory(newEventDto.getCategory()));
         event = repository.save(event);
 
-        return EventMapper.toEventDto(event, UserMapper.toUserShortDto(event.getInitiator()),
-                CategoryMapper.toCategoryDto(event.getCategory()));
+        return eventMapper.toEventDto(event, UserMapper.toUserShortDto(event.getInitiator()),
+                categoryMapper.toCategoryDto(event.getCategory()));
     }
 
     @Override
@@ -166,7 +170,7 @@ public class EventServiceImpl implements EventService {
         client.createHit(request);
         event.setViews(client.getStatsUnique(request.getRequestURI()).getBody());
         saveEvent(event);
-        return EventMapper.toEventDto(event, UserMapper.toUserShortDto(event.getInitiator()), CategoryMapper.toCategoryDto(event.getCategory()));
+        return eventMapper.toEventDto(event, UserMapper.toUserShortDto(event.getInitiator()), categoryMapper.toCategoryDto(event.getCategory()));
     }
 
     @Override
@@ -176,8 +180,8 @@ public class EventServiceImpl implements EventService {
         if (!userService.getUser(userId).getId().equals(event.getInitiator().getId())) {
             throw new ValidationException("Вы не являетесь инициатором события.");
         } else {
-            return EventMapper.toEventDto(event, UserMapper.toUserShortDto(event.getInitiator()),
-                    CategoryMapper.toCategoryDto(event.getCategory()));
+            return eventMapper.toEventDto(event, UserMapper.toUserShortDto(event.getInitiator()),
+                    categoryMapper.toCategoryDto(event.getCategory()));
         }
     }
 
@@ -220,9 +224,9 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventShortDto> getShortEvent(List<Event> events) {
         return events.stream()
-                .map(event -> EventMapper.toEventShortDto(event,
+                .map(event -> eventMapper.toEventShortDto(event,
                         UserMapper.toUserShortDto(event.getInitiator()),
-                        CategoryMapper.toCategoryDto(event.getCategory())))
+                        categoryMapper.toCategoryDto(event.getCategory())))
                 .collect(Collectors.toList());
     }
 
@@ -236,9 +240,9 @@ public class EventServiceImpl implements EventService {
             return List.of();
         } else {
             return events.stream()
-                    .map(event -> EventMapper.toEventDto(event,
+                    .map(event -> eventMapper.toEventDto(event,
                             UserMapper.toUserShortDto(event.getInitiator()),
-                            CategoryMapper.toCategoryDto(event.getCategory())))
+                            categoryMapper.toCategoryDto(event.getCategory())))
                     .collect(Collectors.toList());
         }
     }
@@ -284,8 +288,8 @@ public class EventServiceImpl implements EventService {
             event.setRequestModeration(eventDto.getRequestModeration());
         }
 
-        return EventMapper.toEventDto(saveEvent(event),
+        return eventMapper.toEventDto(saveEvent(event),
                 UserMapper.toUserShortDto(event.getInitiator()),
-                CategoryMapper.toCategoryDto(event.getCategory()));
+                categoryMapper.toCategoryDto(event.getCategory()));
     }
 }
