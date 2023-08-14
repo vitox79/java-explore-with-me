@@ -28,9 +28,6 @@ public class CompilationServiceImpl implements CompilationService {
 
     private final EventRepository eventRepository;
 
-    private final CompilationMapper compilationMapper;
-
-    private final CategoryMapper categoryMapper;
 
 
 
@@ -39,13 +36,13 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     @Transactional
     public CompilationDto create(NewCompilationDto newCompilationDto) {
-        Compilation compilation = compilationMapper.toCompilation(newCompilationDto);
+        Compilation compilation = CompilationMapper.toCompilation(newCompilationDto);
         if (compilation.getPinned() == null) {
             compilation.setPinned(false);
         }
         compilation.setEvents(getAllEvents(newCompilationDto.getEvents()));
         compilation = repository.save(compilation);
-        return compilationMapper.toCompilationDto(compilation,
+        return CompilationMapper.toCompilationDto(compilation,
             getShortEvent(compilation.getEvents()));
     }
 
@@ -55,12 +52,12 @@ public class CompilationServiceImpl implements CompilationService {
         int pageNumber = (int) Math.ceil((double) from / size);
         if (pinned == null) {
             return repository.findAll(PageRequest.of(pageNumber, size)).stream()
-                .map(compilation -> compilationMapper.toCompilationDto(compilation,
+                .map(compilation -> CompilationMapper.toCompilationDto(compilation,
                     getShortEvent(compilation.getEvents())))
                 .collect(Collectors.toList());
         } else {
             return repository.findByPinned(pinned, PageRequest.of(pageNumber, size)).stream()
-                .map(compilation -> compilationMapper.toCompilationDto(compilation,
+                .map(compilation -> CompilationMapper.toCompilationDto(compilation,
                     getShortEvent(compilation.getEvents())))
                 .collect(Collectors.toList());
         }
@@ -71,7 +68,7 @@ public class CompilationServiceImpl implements CompilationService {
     public CompilationDto getById(Long id) {
         Compilation compilation = repository.findById(id).orElseThrow(() ->
             new NotFoundException("Данной подборки не существует"));
-        return compilationMapper.toCompilationDto(compilation, getShortEvent(compilation.getEvents()));
+        return CompilationMapper.toCompilationDto(compilation, getShortEvent(compilation.getEvents()));
     }
 
     @Override
@@ -99,14 +96,14 @@ public class CompilationServiceImpl implements CompilationService {
             compilation.setEvents(getAllEvents(compilationDto.getEvents()));
         }
         compilation = repository.save(compilation);
-        return compilationMapper.toCompilationDto(compilation, getShortEvent(compilation.getEvents()));
+        return CompilationMapper.toCompilationDto(compilation, getShortEvent(compilation.getEvents()));
     }
 
     @Override
     public List<EventShortDto> getShortEvent(List<Event> events) {
         return events.stream().map(
             event -> eventMapper.toEventShortDto(event, UserMapper.toUserShortDto(event.getInitiator()),
-                categoryMapper.toCategoryDto(event.getCategory()))).collect(Collectors.toList());
+                CategoryMapper.toCategoryDto(event.getCategory()))).collect(Collectors.toList());
     }
 
     @Override
