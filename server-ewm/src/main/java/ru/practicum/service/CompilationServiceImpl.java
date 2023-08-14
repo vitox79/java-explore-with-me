@@ -29,7 +29,7 @@ public class CompilationServiceImpl implements CompilationService {
     private final EventRepository eventRepository;
 
 
-
+    private final CategoryMapper categoryMapper;
 
     private final EventMapper eventMapper;
 
@@ -103,7 +103,7 @@ public class CompilationServiceImpl implements CompilationService {
     public List<EventShortDto> getShortEvent(List<Event> events) {
         return events.stream().map(
             event -> eventMapper.toEventShortDto(event, UserMapper.toUserShortDto(event.getInitiator()),
-                CategoryMapper.toCategoryDto(event.getCategory()))).collect(Collectors.toList());
+                categoryMapper.toCategoryDto(event.getCategory()))).collect(Collectors.toList());
     }
 
     @Override

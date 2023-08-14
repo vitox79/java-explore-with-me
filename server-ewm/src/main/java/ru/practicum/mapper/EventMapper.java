@@ -3,6 +3,7 @@ package ru.practicum.mapper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
 import ru.practicum.dto.*;
 import ru.practicum.enums.State;
 import ru.practicum.model.Event;
@@ -10,7 +11,8 @@ import ru.practicum.model.Location;
 
 import java.time.LocalDateTime;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Component
+
 public class EventMapper {
     public static Event toEvent(NewEventDto eventDto) {
         return Event.builder()

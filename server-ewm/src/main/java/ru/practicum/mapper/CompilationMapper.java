@@ -3,6 +3,7 @@ package ru.practicum.mapper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
 import ru.practicum.dto.CompilationDto;
 import ru.practicum.dto.EventShortDto;
 import ru.practicum.dto.NewCompilationDto;
@@ -10,7 +11,8 @@ import ru.practicum.model.Compilation;
 
 import java.util.List;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Component
+
 public class CompilationMapper {
     public static Compilation toCompilation(NewCompilationDto compilationDto) {
         return Compilation.builder()
