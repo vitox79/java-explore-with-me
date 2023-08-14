@@ -32,12 +32,6 @@ public class RequestServiceImpl implements RequestService {
 
     private final EventRepository eventRepository;
 
-    private final RequestMapper requestMapper;
-
-
-
-
-
 
     @Override
     @Transactional
@@ -67,7 +61,7 @@ public class RequestServiceImpl implements RequestService {
                 event.setConfirmedRequests(event.getConfirmedRequests() + 1);
                 saveEvent(event);
             }
-            return requestMapper.toRequestDto(repository.save(request));
+            return RequestMapper.toRequestDto(repository.save(request));
         }
     }
 
@@ -81,7 +75,7 @@ public class RequestServiceImpl implements RequestService {
             throw new ValidationException("Вы не запрашивали участие на это событие.");
         }
         request.setStatus(Status.CANCELED);
-        return requestMapper.toRequestDto(repository.save(request));
+        return RequestMapper.toRequestDto(repository.save(request));
     }
 
     @Override
@@ -102,7 +96,7 @@ public class RequestServiceImpl implements RequestService {
             throw new ConflictException("Невозможно изменить так как уже принято или отклонённая заявка.");
         }
         List<RequestDto> requestDtos = repository.saveAll(requests).stream()
-            .map(requestMapper::toRequestDto).collect(Collectors.toList());
+            .map(RequestMapper::toRequestDto).collect(Collectors.toList());
         switch (requestDto.getStatus()) {
             case REJECTED:
                 return UpdateRequestDtoResult.builder().rejectedRequests(requestDtos).build();
@@ -123,7 +117,7 @@ public class RequestServiceImpl implements RequestService {
     @Transactional(readOnly = true)
     public List<RequestDto> getByUser(Long userId) {
         User user = getUser(userId);
-        return repository.findByRequesterId(user.getId()).stream().map(requestMapper::toRequestDto)
+        return repository.findByRequesterId(user.getId()).stream().map(RequestMapper::toRequestDto)
             .collect(Collectors.toList());
     }
 
@@ -135,7 +129,7 @@ public class RequestServiceImpl implements RequestService {
         if (!event.getInitiator().getId().equals(user.getId())) {
             throw new ConflictException("Вы не являетесь инициатором события, не возможно получить список заявок.");
         }
-        return repository.findByEventId(event.getId()).stream().map(requestMapper::toRequestDto)
+        return repository.findByEventId(event.getId()).stream().map(RequestMapper::toRequestDto)
             .collect(Collectors.toList());
     }
 
