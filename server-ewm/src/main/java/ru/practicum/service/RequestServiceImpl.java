@@ -84,8 +84,8 @@ public class RequestServiceImpl implements RequestService {
     @Override
     @Transactional
     public UpdateRequestDtoResult update(Long eventId, Long userId, UpdateRequestDtoRequest requestDto) {
-        User user = getUser(userId);
-        Event event = getEventById(eventId);
+        User user = userService.getUser(userId);
+        Event event = eventService.getEventById(eventId);
         if (!event.getInitiator().getId().equals(user.getId())) {
             throw new ConflictException("Вы не являетесь инициатором события, не возможно изменить статус заявок.");
         }
@@ -108,7 +108,7 @@ public class RequestServiceImpl implements RequestService {
                     throw new ConflictException("Вы не можете принять данную заявку, так как лимит будет превышен");
                 }
                 event.setConfirmedRequests(event.getConfirmedRequests() + requestDtos.size());
-                saveEvent(event);
+                eventService.saveEvent(event);
                 return UpdateRequestDtoResult.builder().confirmedRequests(requestDtos).build();
             default:
                 throw new ValidationException("Вы можете только подтвердить или отказать заявкам на участие.");
