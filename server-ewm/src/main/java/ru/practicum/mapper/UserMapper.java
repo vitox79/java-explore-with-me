@@ -1,7 +1,5 @@
 package ru.practicum.mapper;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import ru.practicum.dto.UserDto;
 import ru.practicum.dto.UserShortDto;
 import ru.practicum.model.User;

@@ -1,8 +1,6 @@
 package ru.practicum.mapper;
 
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import ru.practicum.dto.CategoryDto;
 import ru.practicum.model.Category;
 
