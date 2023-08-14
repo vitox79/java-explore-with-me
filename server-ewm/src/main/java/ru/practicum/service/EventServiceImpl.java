@@ -23,7 +23,6 @@ import ru.practicum.model.Category;
 import ru.practicum.model.Event;
 import ru.practicum.model.User;
 import ru.practicum.repository.EventRepository;
-import ru.practicum.repository.UserRepository;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
@@ -35,18 +34,13 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
-
     private final EventRepository repository;
-
-    private final UserRepository userRepository;
-
     private final UserService userService;
     private final CategoryService categoryService;
     private final EventMapper mapper;
     private final CategoryMapper categoryMapper;
+
     private final StatsClient client;
-
-
 
     @Override
     @Transactional
@@ -293,11 +287,5 @@ public class EventServiceImpl implements EventService {
         return mapper.toEventDto(saveEvent(event),
                 UserMapper.toUserShortDto(event.getInitiator()),
                 categoryMapper.toCategoryDto(event.getCategory()));
-    }
-
-    @Transactional(readOnly = true)
-    public User getUser(Long id) {
-        return userRepository.findById(id)
-            .orElseThrow(() -> new NotFoundException(String.format("Категории с id %d не найдено", id)));
     }
 }
