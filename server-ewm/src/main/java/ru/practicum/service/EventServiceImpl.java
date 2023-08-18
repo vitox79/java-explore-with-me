@@ -44,7 +44,6 @@ public class EventServiceImpl implements EventService {
     private final CategoryRepository categoryRepository;
 
     private final EventMapper mapper;
-    private final CategoryMapper categoryMapper;
 
     private final StatsClient client;
 
@@ -60,7 +59,7 @@ public class EventServiceImpl implements EventService {
         event = repository.save(event);
 
         return mapper.toEventDto(event, UserMapper.toUserShortDto(event.getInitiator()),
-            categoryMapper.toCategoryDto(event.getCategory()));
+            CategoryMapper.toCategoryDto(event.getCategory()));
     }
 
     @Override
@@ -182,7 +181,7 @@ public class EventServiceImpl implements EventService {
         event.setViews(client.getStatsUnique(request.getRequestURI()).getBody());
         saveEvent(event);
         return mapper.toEventDto(event, UserMapper.toUserShortDto(event.getInitiator()),
-            categoryMapper.toCategoryDto(event.getCategory()));
+            CategoryMapper.toCategoryDto(event.getCategory()));
     }
 
     @Override
@@ -195,7 +194,7 @@ public class EventServiceImpl implements EventService {
             throw new ValidationException("Вы не являетесь инициатором события.");
         } else {
             return mapper.toEventDto(event, UserMapper.toUserShortDto(event.getInitiator()),
-                categoryMapper.toCategoryDto(event.getCategory()));
+                CategoryMapper.toCategoryDto(event.getCategory()));
         }
     }
 
@@ -242,7 +241,7 @@ public class EventServiceImpl implements EventService {
         return events.stream()
             .map(event -> mapper.toEventShortDto(event,
                 UserMapper.toUserShortDto(event.getInitiator()),
-                categoryMapper.toCategoryDto(event.getCategory())))
+                CategoryMapper.toCategoryDto(event.getCategory())))
             .collect(Collectors.toList());
     }
 
@@ -258,7 +257,7 @@ public class EventServiceImpl implements EventService {
             return events.stream()
                 .map(event -> mapper.toEventDto(event,
                     UserMapper.toUserShortDto(event.getInitiator()),
-                    categoryMapper.toCategoryDto(event.getCategory())))
+                    CategoryMapper.toCategoryDto(event.getCategory())))
                 .collect(Collectors.toList());
         }
     }
@@ -308,6 +307,6 @@ public class EventServiceImpl implements EventService {
 
         return mapper.toEventDto(saveEvent(event),
             UserMapper.toUserShortDto(event.getInitiator()),
-            categoryMapper.toCategoryDto(event.getCategory()));
+            CategoryMapper.toCategoryDto(event.getCategory()));
     }
 }

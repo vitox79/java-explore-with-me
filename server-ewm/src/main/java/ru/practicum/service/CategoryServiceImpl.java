@@ -19,13 +19,12 @@ import java.util.stream.Collectors;
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository repository;
 
-    private final CategoryMapper categoryMapper;
 
     @Override
     @Transactional
     public CategoryDto create(CategoryDto categoryDto) {
-        Category category = categoryMapper.toCategory(categoryDto);
-        return categoryMapper.toCategoryDto(repository.save(category));
+        Category category = CategoryMapper.toCategory(categoryDto);
+        return CategoryMapper.toCategoryDto(repository.save(category));
     }
 
     @Override
@@ -33,13 +32,13 @@ public class CategoryServiceImpl implements CategoryService {
     public List<CategoryDto> getAll(int from, int size) {
         int pageNumber = (int) Math.ceil((double) from / size);
         return repository.findAll(PageRequest.of(pageNumber, size, Sort.by("id").ascending()))
-            .stream().map(categoryMapper::toCategoryDto)
+            .stream().map(CategoryMapper::toCategoryDto)
             .collect(Collectors.toList());
     }
 
     @Override
     public CategoryDto getById(Long id) {
-        return categoryMapper.toCategoryDto(getCategory(id));
+        return CategoryMapper.toCategoryDto(getCategory(id));
     }
 
     @Override
@@ -53,7 +52,7 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDto update(Long id, CategoryDto categoryDto) {
         Category category = getCategory(id);
         category.setName(categoryDto.getName());
-        return categoryMapper.toCategoryDto(repository.save(category));
+        return CategoryMapper.toCategoryDto(repository.save(category));
     }
 
     @Override

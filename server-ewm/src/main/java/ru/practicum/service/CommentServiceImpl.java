@@ -38,25 +38,18 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
 
-    private final EventMapper eventMapper;
-
     private final EventRepository eventRepository;
-
-
-    private final CategoryMapper categoryMapper;
-
-    private final EventService eventService;
-    private final CommentMapper commentMapper;
 
 
     @Override
     @Transactional
     public CommentDto create(Long eventId, Long userId, RequestCommentDto commentDto) {
-        Event event = eventService.getEventById(eventId);
+        Event event = eventRepository.findById(eventId)
+            .orElseThrow(() -> new NotFoundException(String.format("Категории с id %d не найдено", eventId)));
         if (event.getState() == State.PUBLISHED) {
-            Comment comment = commentMapper.toComment(commentDto, event, userRepository.findById(userId)
+            Comment comment = CommentMapper.toComment(commentDto, event, userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(String.format("Категории с id %d не найдено", userId))));
-            return commentMapper.toCommentDto(commentRepository.save(comment));
+            return CommentMapper.toCommentDto(commentRepository.save(comment));
         } else {
             throw new ConflictException("Комментарий можно написать только к опубликовонным событиям");
         }
@@ -66,13 +59,13 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     public CommentDto update(Long userId, Long comId, RequestCommentDto commentDto) {
         Comment comment = commentRepository.findById(comId).orElseThrow(() ->
-                new NotFoundException(String.format("Комментария с id %d не найдено", comId)));
+            new NotFoundException(String.format("Комментария с id %d не найдено", comId)));
         if (!comment.getAuthor().getId().equals(userId)) {
             throw new ValidationException("Вы не являетей создателем этого комментария");
         } else {
             comment.setText(commentDto.getText());
         }
-        return commentMapper.toCommentDto(commentRepository.save(comment));
+        return CommentMapper.toCommentDto(commentRepository.save(comment));
     }
 
     @Override
@@ -83,9 +76,9 @@ public class CommentServiceImpl implements CommentService {
         }
         int pageNumber = (int) Math.ceil((double) from / size);
         List<Long> eventsId = commentRepository.findByAuthorId(userId)
-                .stream()
-                .map(comment -> comment.getEvent().getId())
-                .collect(Collectors.toList());
+            .stream()
+            .map(comment -> comment.getEvent().getId())
+            .collect(Collectors.toList());
         return getCommentEventDto(eventsId, pageNumber, size);
     }
 
@@ -110,18 +103,19 @@ public class CommentServiceImpl implements CommentService {
                         throw new ValidationException("Start не должен быть позже end или быть равным ему.");
                     } else {
                         commentDtos = commentRepository.findByCreatedBeforeAndCreatedAfter(end, start,
-                                        PageRequest.of(pageNumber, size, Sort.by("created").descending()))
-                                .stream()
-                                .map(commentMapper::toCommentDto)
-                                .collect(Collectors.toList());
+                                PageRequest.of(pageNumber, size, Sort.by("created").descending()))
+                            .stream()
+                            .map(CommentMapper::toCommentDto)
+                            .collect(Collectors.toList());
                     }
                 } else if (start == null && end == null) {
                     commentDtos = commentRepository.findAll(PageRequest.of(pageNumber, size,
-                                    Sort.by("created").descending())).stream()
-                            .map(commentMapper::toCommentDto)
-                            .collect(Collectors.toList());
+                            Sort.by("created").descending())).stream()
+                        .map(CommentMapper::toCommentDto)
+                        .collect(Collectors.toList());
                 } else {
-                    throw new ValidationException("Нужна указывать либо оба параметра start, end или не указывать вообще.");
+                    throw new ValidationException(
+                        "Нужна указывать либо оба параметра start, end или не указывать вообще.");
                 }
                 break;
             case OLD:
@@ -130,18 +124,19 @@ public class CommentServiceImpl implements CommentService {
                         throw new ValidationException("Start не должен быть позже end или быть равным ему.");
                     } else {
                         commentDtos = commentRepository.findByCreatedBeforeAndCreatedAfter(end, start,
-                                        PageRequest.of(pageNumber, size, Sort.by("created").ascending()))
-                                .stream()
-                                .map(commentMapper::toCommentDto)
-                                .collect(Collectors.toList());
+                                PageRequest.of(pageNumber, size, Sort.by("created").ascending()))
+                            .stream()
+                            .map(CommentMapper::toCommentDto)
+                            .collect(Collectors.toList());
                     }
                 } else if (start == null && end == null) {
                     commentDtos = commentRepository.findAll(PageRequest.of(pageNumber, size,
-                                    Sort.by("created").ascending())).stream()
-                            .map(commentMapper::toCommentDto)
-                            .collect(Collectors.toList());
+                            Sort.by("created").ascending())).stream()
+                        .map(CommentMapper::toCommentDto)
+                        .collect(Collectors.toList());
                 } else {
-                    throw new ValidationException("Нужна указывать либо оба параметра start, end или не указывать вообще.");
+                    throw new ValidationException(
+                        "Нужна указывать либо оба параметра start, end или не указывать вообще.");
                 }
                 break;
         }
@@ -164,11 +159,12 @@ public class CommentServiceImpl implements CommentService {
             }
             List<Comment> comments = commentRepository.findAllById(comsId);
             List<Long> validComments = comments.stream()
-                    .filter(comment -> !comment.getAuthor().getId().equals(userId))
-                    .map(Comment::getId)
-                    .collect(Collectors.toList());
+                .filter(comment -> !comment.getAuthor().getId().equals(userId))
+                .map(Comment::getId)
+                .collect(Collectors.toList());
             if (validComments.size() > 0) {
-                throw new ValidationException(String.format("Вы не являетей создателем комментариев: %s", validComments));
+                throw new ValidationException(
+                    String.format("Вы не являетей создателем комментариев: %s", validComments));
             } else {
                 commentRepository.deleteAllById(comsId);
             }
@@ -186,7 +182,8 @@ public class CommentServiceImpl implements CommentService {
             try {
                 commentRepository.deleteAllById(comsId);
             } catch (EmptyResultDataAccessException e) {
-                throw new ConflictException("Возможно некоторые комментарии были удалены, проверьте перед повторным удалением.");
+                throw new ConflictException(
+                    "Возможно некоторые комментарии были удалены, проверьте перед повторным удалением.");
             }
         }
     }
@@ -199,15 +196,15 @@ public class CommentServiceImpl implements CommentService {
     public List<CommentEventDto> getCommentEventDto(List<Long> eventsId, int page, int size) {
         List<CommentEventDto> commentEventDtos = eventRepository.findByIdIn(eventsId, PageRequest.of(page, size))
             .stream()
-            .map(event -> eventMapper.toCommentEventDto(event,
+            .map(event -> EventMapper.toCommentEventDto(event,
                 UserMapper.toUserShortDto(event.getInitiator()),
-                categoryMapper.toCategoryDto(event.getCategory())))
+                CategoryMapper.toCategoryDto(event.getCategory())))
             .collect(Collectors.toList());
         Map<Long, List<CommentDto>> commentsMap = commentRepository.findByEventIdIn(eventsId)
             .stream()
             .filter(comment -> comment.getEvent() != null)
             .collect(groupingBy(comment -> comment.getEvent().getId(),
-                Collectors.mapping(commentMapper::toCommentDto, Collectors.toList())));
+                Collectors.mapping(CommentMapper::toCommentDto, Collectors.toList())));
         for (CommentEventDto eventDto : commentEventDtos) {
             eventDto.setCommentDtos(commentsMap.getOrDefault(eventDto.getId(), List.of()));
         }
